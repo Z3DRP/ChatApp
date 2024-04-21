@@ -13,6 +13,7 @@ const override: SerializedStyles = css`
     border-color: red;
 `;
 
+
 const Loader = ({ isLoading }: LoaderProps) => {
     return (
         <div className="loader">
