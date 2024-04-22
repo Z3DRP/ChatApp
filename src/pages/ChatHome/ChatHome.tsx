@@ -1,37 +1,83 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import './ChatHome.css';
-import Button from "../../components/Button/Button";
 import Loader from "../../components/Loader/Loader";
-import NoMessages from "../../components/NoMessages/NoMessages";
 import MessageList from "../../components/MessageList/MessageList";
 import IMessage from "../../interfaces/models/IMessage";
 import { messageType } from "../../enums/messageType";
+import messageListProps from "../../interfaces/props/messageListProps";
+import { generateMessageId } from "../../utils/idGenerator";
 
-const ChatHome = () => {
+const ChatHome = (props: messageListProps) => {
     // initial state might have to change
     // and the message type might have to change to be data type that is ordered
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [messages, setMessages] = useState([] as IMessage[]);
-    let currentMsg: IMessage = {uId: 'u1', type: messageType.userCreated, body: undefined};
+    // const [messages, setMessages] = useState([] as IMessage[]);
+    const [messages, setMessages] = useState(props.messages);
+    let currentMsg: IMessage = {uId: generateMessageId(), type: messageType.userCreated, body: undefined, creationDate: new Date()};
     
+    const processMessage = (msg: IMessage) => {
+        setIsLoading(true);
+
+        const options = {
+            method: 'Post',
+            body: JSON.stringify({
+                message: currentMsg,
+                responseType: messageType.generated
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await fetch('https://localhost:8000/chatMessage', options);
+                const msgResult = await response.json();
+
+                if (!response.ok) {
+                    reject(msgResult);
+                } else {
+                    resolve(msgResult.message);
+                }
+            } catch(err) {
+                reject(err);
+            }
+        });
+    } 
+
     // TODO update to async
     const handleSendMsg = () => {
         console.log('sending msg....');
         
         if (currentMsg.body === '' || currentMsg.body === undefined) {
-            // showToast
+            props.handleError('Error, empty messages cannot be sent.', {type: 'error'});
         } else {
             currentMsg.creationDate = new Date();
-            setMessages([...messages, currentMsg]);
-
-            setIsLoading(true);
-            // then call api to get answer NOTE not sure if causing render with useState bfore api call will cause issues
-
+            processMessage(currentMsg)
+            .then((result) => {
+                console.log(`[SUCCESS] message result: ${result}`);
+                setMessages([...messages, currentMsg, result as IMessage]);
+            })
+            .catch(err => {
+                console.log(`[ERROR]: ${err}`);
+                props.handleError(err, {type: 'error'});
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
         }
     };
+
     const handleMsgChange = (event: any) => currentMsg.body = event.currentTarget.value;
 
-    const loadPrevMessages = () => console.log('loading prev msgs');
+    useEffect(() => {
+        if (props.messages.length === 0) {
+            setMessages([]);
+        } else {
+            let sortedMessages = props.messages.sort((curr, next) => next.creationDate.getTime() - next.creationDate.getTime());
+            setMessages(sortedMessages);
+        }
+    }, [props.messages]);
 
     return (
         <>
@@ -44,7 +90,7 @@ const ChatHome = () => {
                         )
                     }
                     {
-                        !isLoading && <MessageList messages={messages} />
+                        !isLoading && <MessageList handleError={props.handleError} messages={messages} />
                     } 
                 </div>
                 <div className="chat-text">

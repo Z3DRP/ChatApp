@@ -8,7 +8,7 @@ const ChatMessage = (props: messageProp) => {
         <li className="chat-item">
             <div className={`msg-${props.message.type}`}>
                 <p className="msg-body">{props.message.body}</p>
-                <span className="creation-date">{props.message.creationDate.toString()}</span>
+                <span className="creation-date">{props?.message?.creationDate?.toString() ?? ''}</span>
             </div>
         </li>
     )

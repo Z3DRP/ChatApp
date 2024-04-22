@@ -1,0 +1,10 @@
+.prev-chats-container {
+    margin: 2rem;
+    padding: 2rem;
+    background-color: #905a5f;
+    width: 12rem;
+    height: 8rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align: justify;
+}
