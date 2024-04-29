@@ -13,7 +13,7 @@ const ChatHome = (props: messageListProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     // const [messages, setMessages] = useState([] as IMessage[]);
     const [messages, setMessages] = useState(props.messages);
-    let currentMsg: IMessage = {uId: generateMessageId(), type: messageType.userCreated, body: undefined, creationDate: new Date()};
+    let currentMsg: IMessage = {uId: generateMessageId(), type: messageType.user, body: undefined, creationDate: new Date()};
     
     const processMessage = (msg: IMessage) => {
         setIsLoading(true);
@@ -22,7 +22,8 @@ const ChatHome = (props: messageListProps) => {
             method: 'Post',
             body: JSON.stringify({
                 message: currentMsg,
-                responseType: messageType.generated
+                isPrevChat: messages.length > 0,
+                chatId: props?.chatId
             }),
             headers: {
                 'Content-Type': 'application/json'
@@ -31,7 +32,7 @@ const ChatHome = (props: messageListProps) => {
 
         return new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch('https://localhost:8000/chatMessage', options);
+                const response = await fetch('https://localhost:8000/chat/message', options);
                 const msgResult = await response.json();
 
                 if (!response.ok) {
@@ -46,17 +47,21 @@ const ChatHome = (props: messageListProps) => {
     } 
 
     // TODO update to async
-    const handleSendMsg = () => {
+    const handleSendMsg = async () => {
         console.log('sending msg....');
         
         if (currentMsg.body === '' || currentMsg.body === undefined) {
             props.handleError('Error, empty messages cannot be sent.', {type: 'error'});
         } else {
             currentMsg.creationDate = new Date();
-            processMessage(currentMsg)
-            .then((result) => {
+            await processMessage(currentMsg)
+            .then((result: any) => {
+                // TODO update result from type any
                 console.log(`[SUCCESS] message result: ${result}`);
-                setMessages([...messages, currentMsg, result as IMessage]);
+                if (!result?.success) {
+                    throw new Error(result?.message);
+                }
+                setMessages([...messages, currentMsg, result?.chatCompletion as IMessage]);
             })
             .catch(err => {
                 console.log(`[ERROR]: ${err}`);
@@ -90,7 +95,7 @@ const ChatHome = (props: messageListProps) => {
                         )
                     }
                     {
-                        !isLoading && <MessageList handleError={props.handleError} messages={messages} />
+                        !isLoading && <MessageList handleError={props.handleError} messages={messages} isPrevChat={messages.length > 0} />
                     } 
                 </div>
                 <div className="chat-text">

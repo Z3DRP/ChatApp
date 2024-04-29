@@ -3,6 +3,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import ChatHome from "../../pages/ChatHome/ChatHome";
 import IChat from "../../interfaces/models/IChat";
 import IMessage from "../../interfaces/models/IMessage";
+import { generateChatId } from "../../utils/idGenerator";
 import { ToastContainer, toast } from "react-toastify";
 import ToastOptions from "../../interfaces/props/toastOptions";
 
@@ -37,17 +38,31 @@ return new Promise<void>((resolve, reject) => {
 
 const AppBody = () => {
     const [previousChats, setPreviousChats] = useState([] as IChat[]);
-    const [messages, setMessages] = useState([] as IMessage[]);
-
+    // const [messages, setMessages] = useState([] as IMessage[]);
+    const [currentChat, setCurrentChat] = useState<IChat>({} as IChat);
+    const usrId = 1;
     const handleChatChange = (event: any) => {
         let selectedChat = previousChats.filter(chat => chat.cId === event.currentTarget.dataset.cId)[0];
-        setMessages(selectedChat.messages ?? []);
+        // setMessages(selectedChat.messages ?? []);
+        setCurrentChat(selectedChat);
     }
 
     useEffect(() => {   
         const fetchPreviousChats = () => {
             return new Promise(async (resolve, reject) => {
-                const response = await fetch('http://localhost:8000/previousChats');
+                const options = {
+                    method: 'GET',
+                    body: JSON.stringify(
+                        {
+                            uid: usrId
+                        }
+                    ),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                const response = await fetch(`http://localhost:8000/chat/previous`, options);
                 let chatResults: IChat[] = await response.json();
 
                 if (!response.ok) {
@@ -60,9 +75,12 @@ const AppBody = () => {
         }
 
         fetchPreviousChats()
-        .then((result) => {
+        .then((result: any) => {
             console.log(`prev chat results: ${result}`);
-            setPreviousChats(result as IChat[]);
+            if (!result?.success) {
+                throw new Error(result?.message);
+            }
+            setPreviousChats(result?.chats as IChat[]);
         }).catch(err => {
             console.log(err);
             showToast(err, {type: 'error'});
@@ -73,7 +91,7 @@ const AppBody = () => {
         <>
         <ToastContainer />
         <Sidebar chats={previousChats} handleChatChange={handleChatChange}/>
-        <ChatHome messages={messages} handleError={showToast}/>
+        <ChatHome chatId={currentChat?.cId ?? generateChatId()} messages={currentChat?.messages ?? []} handleError={showToast}/>
         </>
     )
 }
