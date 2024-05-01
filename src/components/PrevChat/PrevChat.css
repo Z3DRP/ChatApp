@@ -1,3 +1,32 @@
+.pchat-item {
+    width: 90%;
+    border: 1px solid #F2AC20;
+    margin: .5rem;
+    padding: 1.5rem;
+}
+
+.pchat-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: .5rem;
+}
+
+.pmsg-icon {
+    flex-shrink: 0;
+    margin-right: 1rem;
+}
+
+.pchat-description {
+    flex-grow: 1;
+    margin-right: 1rem;
+}
+
+.pchat-date {
+    margin-left: auto;
+}
+
 .dark {
     color: rgba(2, 62, 125, 1);
     font-variation-settings: 'GRAD' -25;

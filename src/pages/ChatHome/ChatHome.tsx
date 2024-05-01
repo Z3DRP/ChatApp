@@ -32,7 +32,7 @@ const ChatHome = (props: messageListProps) => {
 
         return new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch('https://localhost:8000/chat/message', options);
+                const response = await fetch('https://localhost:443/chat/message', options);
                 const msgResult = await response.json();
 
                 if (!response.ok) {
@@ -88,7 +88,7 @@ const ChatHome = (props: messageListProps) => {
         <>
         <section className="chat-comp">
             <article className="chat-container">
-                <div className="chat-window">
+                <div className={messages.length > 0 ? 'chat-window window-full' : 'chat-window window-empty'}>
                     {
                         isLoading && (
                             <Loader isLoading={isLoading} />
@@ -101,7 +101,7 @@ const ChatHome = (props: messageListProps) => {
                 <div className="chat-text">
                     <input className="chat-input" type="text" onChange={handleMsgChange} />
                     {/* add google font for icon to click to send msg */}
-                    <span className="material-symbols-outlined size-40 dark" onClick={handleSendMsg}>send</span>
+                    <span className="material-symbols-outlined size-40 dark chat-btn" onClick={handleSendMsg}>send</span>
                 </div>
             </article>
         </section>

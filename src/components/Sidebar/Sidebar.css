@@ -1,10 +1,23 @@
+.content {
+    height: 100%;
+    overflow-y: hidden;
+}
+
 .prev-chats-container {
-    margin: 2rem;
-    padding: 2rem;
-    background-color: #905a5f;
-    width: 12rem;
-    height: 8rem;
+    height: 30rem;
     overflow-x: hidden;
-    overflow-y: auto;
-    text-align: justify;
+    overflow-y: scroll;
+}
+
+.prev-chats-title {
+    margin: 1.5rem;
+    text-align: center;
+}
+ol {
+    padding-inline-start: .5rem;
+}
+
+.pchat-list {
+    margin: 0;
+    padding: 0;
 }

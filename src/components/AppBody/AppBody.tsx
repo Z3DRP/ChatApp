@@ -6,6 +6,8 @@ import IMessage from "../../interfaces/models/IMessage";
 import { generateChatId } from "../../utils/idGenerator";
 import { ToastContainer, toast } from "react-toastify";
 import ToastOptions from "../../interfaces/props/toastOptions";
+import './AppBody.css';
+import BigLoader from "../BigLoader/BigLoader";
 
 // TODO update this so when one of the chat lists is clicked in sidebar event is sent to parent(this) component
 // then rerender page and pass true into chatHome which will load prevChat the default for this component
@@ -40,6 +42,7 @@ const AppBody = () => {
     const [previousChats, setPreviousChats] = useState([] as IChat[]);
     // const [messages, setMessages] = useState([] as IMessage[]);
     const [currentChat, setCurrentChat] = useState<IChat>({} as IChat);
+    const [isLoading, setIsLoading] = useState<boolean>();
     const usrId = 1;
     const handleChatChange = (event: any) => {
         let selectedChat = previousChats.filter(chat => chat.cId === event.currentTarget.dataset.cId)[0];
@@ -47,51 +50,55 @@ const AppBody = () => {
         setCurrentChat(selectedChat);
     }
 
-    useEffect(() => {   
+    useEffect(() => {
+        setIsLoading(true);
         const fetchPreviousChats = () => {
             return new Promise(async (resolve, reject) => {
-                const options = {
-                    method: 'GET',
-                    body: JSON.stringify(
-                        {
-                            uid: usrId
-                        }
-                    ),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
+                // const response = await fetch(`https://localhost:443/chat/previous?uid=${usrId}`);
+                const response = await fetch(`http://localhost:8000/chat/previous?uid=${usrId}`);
+                let result = await response.json();
 
-                const response = await fetch(`http://localhost:8000/chat/previous`, options);
-                let chatResults: IChat[] = await response.json();
-
-                if (!response.ok) {
-                    reject(`[RESPONSE ERROR]:: ${response.status}`);
+                if (!response.ok || !result.success) {
+                    reject(!result.success ? `[RESPONSE ERROR]: ${result?.message}`:`[RESPONSE ERROR]:: ${response.status}`);
                 } else {
-                    let sortedChats = chatResults.sort((curr, next) => next?.chatDate.getTime() - curr?.chatDate.getTime());
-                    resolve(sortedChats);
+                    resolve(result?.chats);
                 }
             });
         }
 
         fetchPreviousChats()
-        .then((result: any) => {
-            console.log(`prev chat results: ${result}`);
-            if (!result?.success) {
-                throw new Error(result?.message);
-            }
-            setPreviousChats(result?.chats as IChat[]);
+        .then((results: any) => {
+            console.log(`prev chat results: ${results}`);
+            setPreviousChats(results as IChat[]);
         }).catch(err => {
             console.log(err);
             showToast(err, {type: 'error'});
+        }).finally (() => {
+            setIsLoading(false);
         });
     }, []);
 
     return (
         <>
-        <ToastContainer />
-        <Sidebar chats={previousChats} handleChatChange={handleChatChange}/>
-        <ChatHome chatId={currentChat?.cId ?? generateChatId()} messages={currentChat?.messages ?? []} handleError={showToast}/>
+        <div className={isLoading ? 'loading' : 'app-body'}>
+            <ToastContainer />
+            {
+                isLoading && <BigLoader isLoading={isLoading} />
+            }
+            {
+                !isLoading && (
+
+                    <React.Fragment>
+                        <div className="sidebar">
+                            <Sidebar chats={previousChats} handleChatChange={handleChatChange}/>
+                        </div>
+                        <div className="chathome">
+                            <ChatHome chatId={currentChat?.cId ?? generateChatId()} messages={currentChat?.messages ?? []} handleError={showToast}/>
+                        </div>
+                    </React.Fragment>
+                )
+            }
+        </div>
         </>
     )
 }

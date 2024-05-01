@@ -8,12 +8,12 @@ import ChatList from "../ChatList/ChatList";
 const Sidebar = (props: chatListProps) => {
     
     return (
-        <aside>
+        <aside className="content">
             {/* return a list of divs that hold chat objs */}
-            <h2 className="prev-chat-title">Previous Chats</h2>
+            <h2 className="prev-chats-title">Previous Chats</h2>
             <div className="prev-chats-container">
                 {/* NOTE make scrollable */}
-                <ol className="chat-list'">
+                <ol id="pcl" className="pchat-list'">
                     {
                         props.chats.length === 0 && <NoPrevChat />
                     }

@@ -1,7 +1,21 @@
-.msg-generated {
-    background-color: brown;
+.chat-item {
+    border: 2px solid 293855;
+    border-radius: 15px;
+    box-shadow: 4px 2px 2px #293855;
 }
 
-.msg-userCreated {
-    background-color: lightcoral;
+.msg-assistant {
+    background-color: #4265D6;
+}
+
+.msg-user {
+    background-color: #C2E7C9;
+}
+
+.msg-body {
+
+}
+
+.creation-date {
+    
 }
