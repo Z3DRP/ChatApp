@@ -1,7 +1,7 @@
 import IAddress from "./IAddress";
 
 export default interface IUser {
-    id?: string | undefined;
+    _id?: string | undefined;
     firstName: string | undefined;
     lastName: string | undefined;
     address: IAddress | undefined;

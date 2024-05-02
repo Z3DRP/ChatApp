@@ -26,6 +26,11 @@
     justify-content: space-evenly;
 }
 
+
+.chat-loading {
+    justify-content: center;
+}
+
 .chat-text {
     margin: 1.5rem;
     display: flex;

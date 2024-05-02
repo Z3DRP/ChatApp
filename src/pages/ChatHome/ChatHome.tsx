@@ -5,7 +5,7 @@ import MessageList from "../../components/MessageList/MessageList";
 import IMessage from "../../interfaces/models/IMessage";
 import { messageType } from "../../enums/messageType";
 import messageListProps from "../../interfaces/props/messageListProps";
-import { generateMessageId } from "../../utils/idGenerator";
+import { generateId } from "../../utils/idFactory";
 
 const ChatHome = (props: messageListProps) => {
     // initial state might have to change
@@ -13,7 +13,7 @@ const ChatHome = (props: messageListProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     // const [messages, setMessages] = useState([] as IMessage[]);
     const [messages, setMessages] = useState(props.messages);
-    let currentMsg: IMessage = {uId: generateMessageId(), type: messageType.user, body: undefined, creationDate: new Date()};
+    let currentMsg: IMessage = {_id: generateId('message'), uId: props.userId, type: messageType[messageType.user], body: undefined, creationDate: new Date()};
     
     const processMessage = (msg: IMessage) => {
         setIsLoading(true);
@@ -21,7 +21,7 @@ const ChatHome = (props: messageListProps) => {
         const options = {
             method: 'Post',
             body: JSON.stringify({
-                message: currentMsg,
+                message: msg,
                 isPrevChat: messages.length > 0,
                 chatId: props?.chatId
             }),
@@ -32,7 +32,7 @@ const ChatHome = (props: messageListProps) => {
 
         return new Promise(async (resolve, reject) => {
             try {
-                const response = await fetch('https://localhost:443/chat/message', options);
+                const response = await fetch(`http://localhost:8000/chat/message?=${props.userId}`, options);
                 const msgResult = await response.json();
 
                 if (!response.ok) {
@@ -50,8 +50,8 @@ const ChatHome = (props: messageListProps) => {
     const handleSendMsg = async () => {
         console.log('sending msg....');
         
-        if (currentMsg.body === '' || currentMsg.body === undefined) {
-            props.handleError('Error, empty messages cannot be sent.', {type: 'error'});
+        if (currentMsg.body === '' || currentMsg.body === undefined || currentMsg.body.split(' ').length < 3) {
+            props.handleError('Error, messages must consist of atleast 3 words.', {type: 'error'});
         } else {
             currentMsg.creationDate = new Date();
             await processMessage(currentMsg)
@@ -88,7 +88,7 @@ const ChatHome = (props: messageListProps) => {
         <>
         <section className="chat-comp">
             <article className="chat-container">
-                <div className={messages.length > 0 ? 'chat-window window-full' : 'chat-window window-empty'}>
+                <div className={messages.length > 0 ? 'chat-window window-full' : (!isLoading ? 'chat-window window-empty' : 'chat-loading')}>
                     {
                         isLoading && (
                             <Loader isLoading={isLoading} />

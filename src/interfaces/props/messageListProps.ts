@@ -6,5 +6,6 @@ export default interface messageListProps {
     isPrevChat?: boolean;
     chatId?: string;
     className?: string;
+    userId?: string;
     handleError: (msg: string, options: ToastOptions) => void;
 }

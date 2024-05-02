@@ -3,8 +3,9 @@ import Sidebar from "../Sidebar/Sidebar";
 import ChatHome from "../../pages/ChatHome/ChatHome";
 import IChat from "../../interfaces/models/IChat";
 import IMessage from "../../interfaces/models/IMessage";
-import { generateChatId } from "../../utils/idGenerator";
+import { generateId } from "../../utils/idFactory";
 import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import ToastOptions from "../../interfaces/props/toastOptions";
 import './AppBody.css';
 import BigLoader from "../BigLoader/BigLoader";
@@ -17,21 +18,21 @@ import BigLoader from "../BigLoader/BigLoader";
 const showToast = (message: string, options: ToastOptions): Promise<void> => {
 return new Promise<void>((resolve, reject) => {
     try {
-    switch (options.type) {
-        case 'success':
-        toast.success(message);
-        break;
-        case 'error':
-        toast.error(message);
-        break;
-        case 'warning':
-        toast.warning(message);
-        break;
-        case 'info':
-        toast.info(message);
-        break;
-    }
-    resolve();
+        switch (options.type) {
+            case 'success':
+            toast.success(message);
+            break;
+            case 'error':
+            toast.error(message);
+            break;
+            case 'warning':
+            toast.warning(message);
+            break;
+            case 'info':
+            toast.info(message);
+            break;
+        }
+        resolve();
     } catch (err) {
     reject();
     }
@@ -43,9 +44,9 @@ const AppBody = () => {
     // const [messages, setMessages] = useState([] as IMessage[]);
     const [currentChat, setCurrentChat] = useState<IChat>({} as IChat);
     const [isLoading, setIsLoading] = useState<boolean>();
-    const usrId = 1;
+    const usrId = '1';
     const handleChatChange = (event: any) => {
-        let selectedChat = previousChats.filter(chat => chat.cId === event.currentTarget.dataset.cId)[0];
+        let selectedChat = previousChats.filter(chat => chat._id === event.currentTarget.dataset.cId)[0];
         // setMessages(selectedChat.messages ?? []);
         setCurrentChat(selectedChat);
     }
@@ -68,7 +69,7 @@ const AppBody = () => {
 
         fetchPreviousChats()
         .then((results: any) => {
-            console.log(`prev chat results: ${results}`);
+            console.log(`prev chat results: ${JSON.stringify(results)}`);
             setPreviousChats(results as IChat[]);
         }).catch(err => {
             console.log(err);
@@ -93,7 +94,7 @@ const AppBody = () => {
                             <Sidebar chats={previousChats} handleChatChange={handleChatChange}/>
                         </div>
                         <div className="chathome">
-                            <ChatHome chatId={currentChat?.cId ?? generateChatId()} messages={currentChat?.messages ?? []} handleError={showToast}/>
+                            <ChatHome chatId={currentChat?._id ?? generateId('chat')} userId={usrId} messages={currentChat?.messages ?? []} handleError={showToast}/>
                         </div>
                     </React.Fragment>
                 )
