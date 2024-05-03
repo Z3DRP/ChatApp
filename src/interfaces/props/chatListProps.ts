@@ -3,5 +3,5 @@ import { MouseEvent } from "react";
 
 export default interface chatListProps {
     chats: IChat[];
-    handleChatChange: (event: MouseEvent<HTMLButtonElement>) => void;
+    handleChatChange: (chatId: string) => void;
 }

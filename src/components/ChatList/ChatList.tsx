@@ -14,7 +14,7 @@ const ChatList = (props: chatListProps) => {
         <ol className="prev-chat-list">
             {
                 props.chats.map(chat => (
-                    <PrevChat chat={chat} data-chat-id={chat._id} onClick={(e) => props.handleChatChange(e)}/>
+                    <PrevChat chat={chat} data-chat-id={chat._id} handleChatChange={props.handleChatChange}/>
                 ))
             }
         </ol>

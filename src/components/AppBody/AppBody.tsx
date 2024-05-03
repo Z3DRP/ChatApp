@@ -45,8 +45,8 @@ const AppBody = () => {
     const [currentChat, setCurrentChat] = useState<IChat>({} as IChat);
     const [isLoading, setIsLoading] = useState<boolean>();
     const usrId = '1';
-    const handleChatChange = (event: any) => {
-        let selectedChat = previousChats.filter(chat => chat._id === event.currentTarget.dataset.cId)[0];
+    const handleChatChange = (targetId: any) => {
+        let selectedChat = previousChats.filter(chat => chat._id === targetId)[0];
         // setMessages(selectedChat.messages ?? []);
         setCurrentChat(selectedChat);
     }

@@ -22,6 +22,7 @@ const ChatHome = (props: messageListProps) => {
             method: 'Post',
             body: JSON.stringify({
                 message: msg,
+                prevMessages: messages ?? [],
                 isPrevChat: messages.length > 0,
                 chatId: props?.chatId
             }),
@@ -33,12 +34,12 @@ const ChatHome = (props: messageListProps) => {
         return new Promise(async (resolve, reject) => {
             try {
                 const response = await fetch(`http://localhost:8000/chat/message?=${props.userId}`, options);
-                const msgResult = await response.json();
-
-                if (!response.ok) {
-                    reject(msgResult);
+                
+                if (response.ok) {
+                    const msgResult = await response.json();
+                    resolve(msgResult);
                 } else {
-                    resolve(msgResult.message);
+                    reject(`${response.status}: ${response.statusText}`);
                 }
             } catch(err) {
                 reject(err);
@@ -53,13 +54,15 @@ const ChatHome = (props: messageListProps) => {
         if (currentMsg.body === '' || currentMsg.body === undefined || currentMsg.body.split(' ').length < 3) {
             props.handleError('Error, messages must consist of atleast 3 words.', {type: 'error'});
         } else {
+            let input = document.querySelector('.chat-input') as HTMLInputElement;
+            input.value = '';
             currentMsg.creationDate = new Date();
             await processMessage(currentMsg)
             .then((result: any) => {
                 // TODO update result from type any
                 console.log(`[SUCCESS] message result: ${result}`);
                 if (!result?.success) {
-                    throw new Error(result?.message);
+                    throw new Error(result);
                 }
                 setMessages([...messages, currentMsg, result?.chatCompletion as IMessage]);
             })
@@ -79,7 +82,7 @@ const ChatHome = (props: messageListProps) => {
         if (props.messages.length === 0) {
             setMessages([]);
         } else {
-            let sortedMessages = props.messages.sort((curr, next) => next.creationDate.getTime() - next.creationDate.getTime());
+            let sortedMessages = props.messages.sort((curr, next) => new Date(next.creationDate).getTime() - new Date(next.creationDate).getTime());
             setMessages(sortedMessages);
         }
     }, [props.messages]);
